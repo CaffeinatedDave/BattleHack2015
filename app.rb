@@ -4,6 +4,8 @@ require 'dotenv'
 require 'mongo'
 require 'braintree'
 
+enable :sessions
+
 Dotenv.load
 
 include Mongo
@@ -13,7 +15,7 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URI'])
+$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000&socketTimeoutMS=2000")
 
 Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
@@ -41,44 +43,150 @@ get '/contact/edit' do
 	erb :editform
 end
 
+get '/braintree_init' do
+	erb :braintree_init
+end
+
 get '/braintree_test' do
-	@client_token = Braintree::ClientToken.generate()
+	@user_phone = params['user_phone']
+
+	# Find the user in the DB. Assume user phone number is unique
+	res = $db[:users].find({'phone' => @user_phone}).to_a
+
+	# If no user with that phone number in the DB, go to error page
+	if res.empty?
+		session["error_code"]    = "DB404"
+		session["error_message"] = "No user in the DB for phone number #{@user_phone}"
+
+		redirect '/braintree_error'
+	end
+
+	# Does this user have a Braintree customer?
+	# TODO
+	# They shouldn't have, so create one, with an email address and phone number, and get their customer_id
+
+	# For now, use a placeholder
+	a_customer_id  = "26005876"
+	@client_token = Braintree::ClientToken.generate(
+		:customer_id => a_customer_id
+	)
 	erb :braintree_test
 end
 
 post "/checkout_test" do
+	user_phone = params['user_phone']
+	warn("user phone: #{user_phone}")
+
+	# Find the user in the DB. Assume user phone number is unique
+	res = $db[:users].find({'phone' => user_phone}).to_a
+
+	# If no user with that phone number in the DB, go to error page
+	if res.empty?
+		session["error_code"]    = "DB404"
+		session["error_message"] = "No user in the DB for phone number #{user_phone}"
+
+		redirect '/braintree_error'
+	end
+
+	warn "res: #{res.inspect}"
+
+
+
+
+
 	nonce = params[:payment_method_nonce]
-	# Use payment method nonce here...
 
 	result = Braintree::Transaction.sale(
 		:amount => "10.00",
-		:payment_method_nonce => "nonce-from-the-client"
+		:payment_method_nonce => nonce,
+		:options => {
+			:submit_for_settlement     => true,
+			:store_in_vault_on_success => true
+		}
 	)
+
+	# check whether this was sucessful
+	warn "nonce:           #{nonce}"
+	warn "result:          #{result}"
+	warn "result.inspect:  #{result.inspect}"
+	warn "result.success?: #{result.success?}"
+
+	# Assume no errors, until we've checked.
+	errors                   = ""
+	session["error_code"]    = ""
+	session["error_message"] = ""
+
+	if ! result.success?
+		# Yes, I know this could technically return multiple errors, but for now I'll just spit out the last error.
+		result.errors.each do |error|
+			warn "error.code:      #{error.code}"
+			warn "error.message:   #{error.message}"
+
+			session["error_code"]    = error.code
+			session["error_message"] = error.message
+		end
+
+		redirect '/braintree_error'
+	end
+
+
+	if result.success?
+		#TODO: update DB: this customer has paid
+			# Get this customer's record from the DB
+			# Do they have a Braintree Customer ID?
+				# No, create one:
+				# https://developers.braintreepayments.com/javascript+ruby/guides/customers#create
+			# Yes
+			# 
+
+		#TODO: Buy twilio number for customer, and store it...:
+		numbers = $client.account.available_phone_numbers.list(:country=>"EN")
+		#numbers[0].purchase()
+
+		#redirect '/braintree_success'
+	end
 end
 
-get '/api/v1/test/msg/:number' do
+get "/braintree_error" do
+	@error_code    = session["error_code"]
+	@error_message = session["error_message"]
+
+	erb :braintree_error
+end
+
+get "/braintree_success" do
+	erb :braintree_success
+end
+
+get '/api/v1/test/msg' do
 	message = $client.account.messages.create(
 		:body => "Success!",
-		:to   => params[:number],
+		:to   => params["From"],
 		:from => $number)
 	message.sid
 end
 
-get '/api/v1/test/call/:number' do
+get '/api/v1/test/call' do
 	call = $client.account.calls.create(
 		:url => 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient',
-		:to   => params[:number],
+		:to   => params["From"],
 		:from => $number)
 	call.sid
 end
 
 get '/api/v1/call/incoming' do
-	res = $db[:users].find({'phone' => params['From']})
+	res = $db[:users].find({'phone' => params['From']}).to_a
+	message = ""
+	dial = ""
 
-	Thread.new do 
-		res.each do |r|
-			r["contacts"].each do |c|
-				if c["active"] == 1
+	if res.empty?
+		warn("Couldn't find any records for " + params['From'])
+		message = "This number has not been recognised, and no help is coming. Sorry."
+	else
+		Thread.new do 
+			# We have to only have one... right?
+			res[0]["contacts"].each do |c|
+				if c["active"] == 1 && c["type"] == "SMS"
 					message = $client.account.messages.create(
 						:body => c["message"],
 						:to   => c["phone"],
@@ -88,9 +196,28 @@ get '/api/v1/call/incoming' do
 				end
 			end
 		end
+
+		res[0]["contacts"].each do |c|
+			if dial == ""
+				if c["active"] == 1 && c["type"] == "Phone"
+					dial = c["phone"]
+					dialee = c["name"]
+					warn("Going to call " + c["name"])
+				end
+			end
+		end
+
+		if dial == ""
+			message = "Your call has been registered, and the person's contacts have been notified. Thank you"
+		else
+			message = "Your call has been registered, you will now be put through to this person's emergency contact. Please hold"
+		end
 	end
 
 	Twilio::TwiML::Response.new do |r|
-		r.Say 'Ice, Ice, Baby'
+		r.Say "#{message}"
+		if dial != ""
+			r.Dial dial
+		end
 	end.text
 end
