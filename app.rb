@@ -15,7 +15,7 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000&socketTimeoutMS=2000")
+$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000")
 
 Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
@@ -23,13 +23,31 @@ Braintree::Configuration.public_key = ENV['BRAINTREE_PUBLIC_KEY']
 Braintree::Configuration.private_key = ENV['BRAINREE_PRIVATE_KEY']
 
 get '/' do
-	res = $db[:users].find({'phone' => params['From']}).to_a
-	@user = res[0]
-	erb :home
+	if session["phone"].empty?
+		warn("no user found for phone #{params['From']}")
+
+		redirect '/login'
+	else
+		redirect '/home'
+	end
 end
 
 get '/login' do
 	erb :login
+end
+
+get '/home' do
+	warn("Tried going /home")
+	res = $db[:users].find({'phone' => params['From']}).to_a
+	# If no user with that phone number in the DB, go to error page
+	if res.empty?
+		warn("no user found for phone #{params['From']}")
+		
+		#redirect '/login'
+	else
+		@user = res[0]
+	end
+	erb :home
 end
 
 get '/braintree_init' do
