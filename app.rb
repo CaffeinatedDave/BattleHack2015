@@ -4,8 +4,11 @@ require 'dotenv'
 require 'mongo'
 require 'braintree'
 require 'json'
+require 'sendgrid-ruby'
 
 enable :sessions
+
+set :server, 'webrick'
 
 Dotenv.load
 
@@ -22,6 +25,10 @@ Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
 Braintree::Configuration.public_key = ENV['BRAINTREE_PUBLIC_KEY']
 Braintree::Configuration.private_key = ENV['BRAINREE_PRIVATE_KEY']
+
+sendgrid_api_user = ENV['SENDGRID_API_USER']
+sendgrid_api_key  = ENV['SENDGRID_API_KEY']
+$sendgrid = SendGrid::Client.new(api_user: sendgrid_api_user, api_key: sendgrid_api_key)
 
 def updateMongoDoc( id, field )
 	$db[:users].find(id).find_one_and_update( "$set" => field )
@@ -72,6 +79,18 @@ get '/register' do
 	erb :userform
 end
 
+def emailNewUser( emailAddr )
+
+	email = SendGrid::Mail.new do |m|
+		m.to      = emailAddr
+		m.from    = 'EaaS@example.com'
+		m.subject = 'Welcome to EaaS'
+		m.html    = '<h1>Welcome to Eaas: Emergency as a Service</h1><p>Here at EaaS, your safety is our number one priorty.</p><p>Please return to <a href="https://obbattlehack.herokuapp.com/>EaaS</a> to complete your registration</p>'
+	end
+
+	$sendgrid.send(email)
+end
+
 post '/register' do
 	warn("loginsubmit")
 	warn(params)
@@ -96,6 +115,8 @@ post '/register' do
 			);
 			loginUser( params['inputUserPhone'] )
 			session['user_phone'] = params['inputUserPhone']
+
+			emailNewUser( params['inputUserEmail'] )
 
 			status 200
 			"REGISTERED SUCCESSFULLY #{params}"

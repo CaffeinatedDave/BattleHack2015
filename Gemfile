@@ -7,4 +7,5 @@ gem 'twilio-ruby'
 gem 'mongo'
 gem 'dotenv'
 gem "braintree"
+gem 'sendgrid-ruby'
 
