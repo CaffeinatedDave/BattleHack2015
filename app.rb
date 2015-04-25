@@ -122,7 +122,7 @@ end
 
 get '/home' do
 	warn("Tried going /home")
-	if session["loggedInPhone"] == ""
+	if !session['loggedInPhone'] || session["loggedInPhone"] == ""
 		redirect '/login'
 	else
 		res = $db[:users].find({'phone' => session["loggedInPhone"]}).to_a
