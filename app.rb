@@ -62,5 +62,5 @@ get '/api/v1/incoming' do
 
 	res = $db[:users].find({'phone' => params['From']})
 
-	res.to_s
+	warn(res.to_s)
 end
