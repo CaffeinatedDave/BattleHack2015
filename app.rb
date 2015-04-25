@@ -43,3 +43,13 @@ get '/api/v1/test/call/:number' do
 		:from => $number)
 	call.sid
 end
+
+get '/api/v1/incoming' do
+	Twilio::TwiML::Response.new do |r|
+		r.Say 'Ice Ice Baby'
+	end.text
+
+	res = $db[:users].find({phone => params['From']})
+
+	res.to_s
+end
