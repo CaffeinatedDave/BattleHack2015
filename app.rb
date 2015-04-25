@@ -26,12 +26,57 @@ get '/' do
 	erb :index
 end
 
+get '/braintree_init' do
+	erb :braintree_init
+end
+
 get '/braintree_test' do
-	@client_token = Braintree::ClientToken.generate()
+	@user_phone = params['user_phone']
+
+	# Find the user in the DB. Assume user phone number is unique
+	res = $db[:users].find({'phone' => @user_phone}).to_a
+
+	# If no user with that phone number in the DB, go to error page
+	if res.empty?
+		session["error_code"]    = "DB404"
+		session["error_message"] = "No user in the DB for phone number #{@user_phone}"
+
+		redirect '/braintree_error'
+	end
+
+	# Does this user have a Braintree customer?
+	# TODO
+	# They shouldn't have, so create one, with an email address and phone number, and get their customer_id
+
+	# For now, use a placeholder
+	a_customer_id  = "26005876"
+	@client_token = Braintree::ClientToken.generate(
+		:customer_id => a_customer_id
+	)
 	erb :braintree_test
 end
 
 post "/checkout_test" do
+	user_phone = params['user_phone']
+	warn("user phone: #{user_phone}")
+
+	# Find the user in the DB. Assume user phone number is unique
+	res = $db[:users].find({'phone' => user_phone}).to_a
+
+	# If no user with that phone number in the DB, go to error page
+	if res.empty?
+		session["error_code"]    = "DB404"
+		session["error_message"] = "No user in the DB for phone number #{user_phone}"
+
+		redirect '/braintree_error'
+	end
+
+	warn "res: #{res.inspect}"
+
+
+
+
+
 	nonce = params[:payment_method_nonce]
 
 	result = Braintree::Transaction.sale(
@@ -70,8 +115,14 @@ post "/checkout_test" do
 
 	if result.success?
 		#TODO: update DB: this customer has paid
+			# Get this customer's record from the DB
+			# Do they have a Braintree Customer ID?
+				# No, create one:
+				# https://developers.braintreepayments.com/javascript+ruby/guides/customers#create
+			# Yes
+			# 
 
-		redirect '/braintree_success'
+		#redirect '/braintree_success'
 	end
 end
 
