@@ -15,7 +15,7 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URI'])
+$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000")
 
 Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
