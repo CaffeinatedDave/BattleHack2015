@@ -129,5 +129,6 @@ get '/api/v1/call/incoming' do
 
 	Twilio::TwiML::Response.new do |r|
 		r.Say "#{message}"
+		r.Dial "+447446967965"
 	end.text
 end
