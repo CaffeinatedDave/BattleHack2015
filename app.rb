@@ -91,7 +91,8 @@ post '/register' do
 					:phone => params['inputUserPhone'],
 					:email => params['inputUserEmail'],
 					:password => params['inputUserPassword'],
-					:contacts =>[]
+					:contacts =>[],
+					:twilio_number => "N/A"
 				}
 			);
 			loginUser( params['inputUserPhone'] )
@@ -264,15 +265,16 @@ post "/checkout_test" do
 	if result.success?
 		#TODO: update DB: this customer has paid
 
-		#TODO: Buy twilio number for customer, and store it...:
 		begin
 			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
-			phone_number = numbers[0].phone_number
-			$client.account.incoming_phone_numbers.create(:phone_number => phone_number)
-			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => phone_number})
+			@phone_number = numbers[0].phone_number
+			$client.account.incoming_phone_numbers.create(:phone_number => @phone_number)
+			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => @phone_number})
 		rescue
 			warn("Can't purchase a new number...")
-			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => "+13115552368"})
+			# Who they gonna call....?
+			@phone_number = "+13115552368"
+			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => @phone_number})
 		end
 
 		redirect '/braintree_success'
