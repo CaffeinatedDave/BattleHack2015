@@ -3,6 +3,7 @@ require 'twilio-ruby'
 require 'dotenv'
 require 'mongo'
 require 'braintree'
+require 'json'
 
 enable :sessions
 
@@ -15,12 +16,16 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000&socketTimeoutMS=2000")
+$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000")
 
 Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
 Braintree::Configuration.public_key = ENV['BRAINTREE_PUBLIC_KEY']
 Braintree::Configuration.private_key = ENV['BRAINREE_PRIVATE_KEY']
+
+def updateMongoDoc( id, field )
+	$db[:users].find(id).find_one_and_update( "$set" => field )
+end
 
 get '/' do
 	erb :index
@@ -45,11 +50,41 @@ get '/braintree_test' do
 	end
 
 	# Does this user have a Braintree customer?
-	# TODO
-	# They shouldn't have, so create one, with an email address and phone number, and get their customer_id
+	if res.include? 'braintree_customer_id'
+		a_customer_id  = res[0].braintree_customer_id
+
+		warn "Customer already has braintree_customer_id"
+	else
+		warn "Customer has no braintree_customer_id"
+
+		# They shouldn't have if they're new, so create one, with an email address and phone number, and get their customer_id
+		result = Braintree::Customer.create(
+			:email => res[0]['email'],
+			:phone => res[0]['phone']
+		)
+		if result.success?
+			a_customer_id = result.customer.id
+			warn "Sucessfully added a customer. ID: #{a_customer_id}"
+
+			# Update db document with _id : res[0]['_id']
+			#$db[:users].find(:_id => res[0]['_id']).find_one_and_update( "$set" => { :test_col_3 => "bar" } )
+
+			updateMongoDoc( {:_id => res[0]['_id']}, { :test_col_4 => "bar" } )
+
+			#db.users.update( {_id: ObjectId("553bcdcdf4356848e62008d8")}, {$set: { test_col : "foo" }} )
+		else
+			result.errors.each do |error|
+				warn "error.code:      #{error.code}"
+				warn "error.message:   #{error.message}"
+
+				session["error_code"]    = error.code
+				session["error_message"] = error.message
+			end
+			redirect '/braintree_error'
+		end
+	end
 
 	# For now, use a placeholder
-	a_customer_id  = "26005876"
 	@client_token = Braintree::ClientToken.generate(
 		:customer_id => a_customer_id
 	)
@@ -61,7 +96,7 @@ post "/checkout_test" do
 	warn("user phone: #{user_phone}")
 
 	# Find the user in the DB. Assume user phone number is unique
-	res = $db[:users].find({'phone' => user_phone}).to_a
+	res = $db[:users].find({'phone' => user_phone}).to_ia
 
 	# If no user with that phone number in the DB, go to error page
 	if res.empty?
@@ -126,7 +161,10 @@ post "/checkout_test" do
 		numbers = $client.account.available_phone_numbers.list(:country=>"EN")
 		#numbers[0].purchase()
 
-		#redirect '/braintree_success'
+		#@ice_number = numbers[0]
+		@ice_number = 123
+
+		redirect '/braintree_success'
 	end
 end
 
