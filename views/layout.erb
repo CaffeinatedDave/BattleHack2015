@@ -7,6 +7,15 @@
 		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 		<title>ICE CUBED</title>
 
+		<script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.14/require.min.js"></script>
+		<script>
+			require.config({
+				paths: {
+					braintree: "https://assets.braintreegateway.com/v2/braintree"
+				}
+			});
+		</script>
+
 		<script type="text/javascript">
 		require(["braintree"], function (braintree) {
 			braintree.setup(

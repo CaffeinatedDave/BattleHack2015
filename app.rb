@@ -93,7 +93,7 @@ get '/braintree_test' do
 			# Update db document with _id : res[0]['_id']
 			#$db[:users].find(:_id => res[0]['_id']).find_one_and_update( "$set" => { :test_col_3 => "bar" } )
 
-			updateMongoDoc( {:_id => res[0]['_id']}, { :test_col_4 => "bar" } )
+			updateMongoDoc( {:_id => res[0]['_id']}, { :braintree_customer_id => result.customer.id } )
 
 			#db.users.update( {_id: ObjectId("553bcdcdf4356848e62008d8")}, {$set: { test_col : "foo" }} )
 		else
@@ -120,7 +120,7 @@ post "/checkout_test" do
 	warn("user phone: #{user_phone}")
 
 	# Find the user in the DB. Assume user phone number is unique
-	res = $db[:users].find({'phone' => user_phone}).to_ia
+	res = $db[:users].find({'phone' => user_phone}).to_a
 
 	# If no user with that phone number in the DB, go to error page
 	if res.empty?
