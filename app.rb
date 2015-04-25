@@ -30,12 +30,6 @@ end
 # not a braintree page, unless we say otherwise
 @braintree = false
 
-get '/' do
-
-	redirect '/home'
-
-end
-
 get '/login' do
 	@mode = "login"
 	erb :userform
@@ -122,8 +116,7 @@ def logoutUser()
 	session["loggedInPhone"] = ""
 end
 
-get '/home' do
-	warn("Tried going /home")
+get '/' do
 	if !session['loggedInPhone'] || session["loggedInPhone"] == ""
 		redirect '/login'
 	else
