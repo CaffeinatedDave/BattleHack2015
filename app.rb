@@ -21,7 +21,19 @@ Braintree::Configuration.public_key = ENV['BRAINTREE_PUBLIC_KEY']
 Braintree::Configuration.private_key = ENV['BRAINREE_PRIVATE_KEY']
 
 get '/' do
-	erb :index
+	erb :home
+end
+
+get '/login' do
+	erb :login
+end
+
+get '/contact/new' do
+	erb :newform
+end
+
+get '/contact/edit' do
+	erb :editform
 end
 
 get '/braintree_test' do
