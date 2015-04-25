@@ -27,6 +27,9 @@ def updateMongoDoc( id, field )
 	$db[:users].find(id).find_one_and_update( "$set" => field )
 end
 
+# not a braintree page, unless we say otherwise
+@braintree = false
+
 get '/' do
 	if session["phone"].empty?
 		warn("no user found for phone #{params['From']}")
@@ -61,6 +64,7 @@ end
 
 get '/braintree_test' do
 	@user_phone = params['user_phone']
+	@braintree = true
 
 	# Find the user in the DB. Assume user phone number is unique
 	res = $db[:users].find({'phone' => @user_phone}).to_a
@@ -73,9 +77,11 @@ get '/braintree_test' do
 		redirect '/braintree_error'
 	end
 
+	warn "Does this customer have a braintree_customer_id?"
+	warn "res.inspect: #{res.inspect}"
 	# Does this user have a Braintree customer?
-	if res.include? 'braintree_customer_id'
-		a_customer_id  = res[0].braintree_customer_id
+	if res[0].include? 'braintree_customer_id'
+		a_customer_id  = res[0]['braintree_customer_id']
 
 		warn "Customer already has braintree_customer_id"
 	else
@@ -174,12 +180,6 @@ post "/checkout_test" do
 
 	if result.success?
 		#TODO: update DB: this customer has paid
-			# Get this customer's record from the DB
-			# Do they have a Braintree Customer ID?
-				# No, create one:
-				# https://developers.braintreepayments.com/javascript+ruby/guides/customers#create
-			# Yes
-			# 
 
 		#TODO: Buy twilio number for customer, and store it...:
 		begin
