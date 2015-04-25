@@ -18,6 +18,10 @@ get '/' do
 	erb :index
 end
 
+get '/braintree_test' do
+	erb :braintree_test
+end
+
 get '/api/v1/test/msg/:number' do
 	message = $client.account.messages.create(
 		:body => "Success!",
