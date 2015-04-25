@@ -79,7 +79,7 @@ def emailNewUser( emailAddr )
 		m.to      = emailAddr
 		m.from    = 'EaaS@example.com'
 		m.subject = 'Welcome to EaaS'
-		m.html    = '<h1>Welcome to Eaas: Emergency as a Service</h1><p>Here at EaaS, your safety is our number one priorty.</p><p>Please return to <a href="https://obbattlehack.herokuapp.com/>EaaS</a> to complete your registration</p>'
+		m.html    = '<h1>Welcome to Eaas: Emergency as a Service</h1><p>Here at EaaS, your safety is our number one priorty.</p><p>Please return to <a href="https://obbattlehack.herokuapp.com/">EaaS</a> to complete your registration</p>'
 	end
 
 	$sendgrid.send(email)
