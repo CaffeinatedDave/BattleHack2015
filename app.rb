@@ -86,28 +86,33 @@ get "/braintree_success" do
 	erb :braintree_success
 end
 
-get '/api/v1/test/msg/:number' do
+get '/api/v1/test/msg' do
 	message = $client.account.messages.create(
 		:body => "Success!",
-		:to   => params[:number],
+		:to   => params["From"],
 		:from => $number)
 	message.sid
 end
 
-get '/api/v1/test/call/:number' do
+get '/api/v1/test/call' do
 	call = $client.account.calls.create(
 		:url => 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient',
-		:to   => params[:number],
+		:to   => params["From"],
 		:from => $number)
 	call.sid
 end
 
 get '/api/v1/call/incoming' do
-	res = $db[:users].find({'phone' => params['From']})
+	res = $db[:users].find({'phone' => params['From']}).to_a
+	message = ""
 
-	Thread.new do 
-		res.each do |r|
-			r["contacts"].each do |c|
+	if res.empty?
+		warn("Couldn't find any records for " + params['From'])
+		message = "This number has not been recognised, and no help is coming. Sorry."
+	else
+		Thread.new do 
+			# We have to only have one... right?
+			res[0]["contacts"].each do |c|
 				if c["active"] == 1
 					message = $client.account.messages.create(
 						:body => c["message"],
@@ -118,9 +123,11 @@ get '/api/v1/call/incoming' do
 				end
 			end
 		end
+
+		message = 'Ice, Ice, Baby'
 	end
 
 	Twilio::TwiML::Response.new do |r|
-		r.Say 'Ice, Ice, Baby'
+		r.Say "#{message}"
 	end.text
 end
