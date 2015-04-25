@@ -15,7 +15,7 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000")
+$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000&socketTimeoutMS=2000")
 
 Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
@@ -123,8 +123,8 @@ post "/checkout_test" do
 			# 
 
 		#TODO: Buy twilio number for customer, and store it...:
-		numbers = @client.account.available_phone_numbers.mobile.list(:country=>"EN")
-		numbers[0].purchase()
+		numbers = $client.account.available_phone_numbers.list(:country=>"EN")
+		#numbers[0].purchase()
 
 		#redirect '/braintree_success'
 	end
