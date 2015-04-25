@@ -147,8 +147,13 @@ post "/checkout_test" do
 			# 
 
 		#TODO: Buy twilio number for customer, and store it...:
-		numbers = $client.account.available_phone_numbers.list(:country=>"EN")
-		#numbers[0].purchase()
+		begin
+			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
+			phone_number = numbers[0].phone_number
+			$client.account.incoming_phone_numbers.create(:phone_number => phone_number)
+		rescue
+			warn("Can't purchase a new number...")
+		end
 
 		#redirect '/braintree_success'
 	end
