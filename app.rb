@@ -25,7 +25,18 @@ get '/' do
 end
 
 get '/braintree_test' do
+	@client_token = Braintree::ClientToken.generate()
 	erb :braintree_test
+end
+
+post "/checkout_test" do
+	nonce = params[:payment_method_nonce]
+	# Use payment method nonce here...
+
+	result = Braintree::Transaction.sale(
+		:amount => "10.00",
+		:payment_method_nonce => "nonce-from-the-client"
+	)
 end
 
 get '/api/v1/test/msg/:number' do
