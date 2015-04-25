@@ -21,6 +21,11 @@ Braintree::Configuration.public_key = ENV['BRAINTREE_PUBLIC_KEY']
 Braintree::Configuration.private_key = ENV['BRAINREE_PRIVATE_KEY']
 
 get '/' do
+	
+	res = $db[:users].find({'phone' => params['From']}).to_a
+	
+	@user = res[0]
+
 	erb :home
 end
 
