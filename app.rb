@@ -31,12 +31,52 @@ end
 
 post "/checkout_test" do
 	nonce = params[:payment_method_nonce]
-	# Use payment method nonce here...
+
+	# Test the different example nonces (Braintree::Test::Nonce::<test_nonce>)
+	#	nonce                              result.success?
+	#
+	#	Transactable                       true
+	#	Consumed                           .
+	#	fake-apple-pay-amex-nonce          .
+	#	fake-apple-pay-visa-nonce          .
+	#	fake-apple-pay-mastercard-nonce    .
+	#	PayPalOneTimePayment               .
+	#	PayPalFuturePayment                .
+	#nonce = Braintree::Test::Nonce::Consumed
 
 	result = Braintree::Transaction.sale(
 		:amount => "10.00",
-		:payment_method_nonce => "nonce-from-the-client"
+		:payment_method_nonce => nonce,
+		:options => {
+			:submit_for_settlement     => true,
+			:store_in_vault_on_success => true
+		}
 	)
+
+	errors = ""
+	if ! result.success?
+		result.errors.each do |error|
+			puts error.code
+			puts error.message
+		end
+	end
+
+	# check whether this was sucessful
+	warn "nonce:           #{nonce}"
+	warn "result:          #{result}"
+	warn "result.inspect:  #{result.inspect}"
+	warn "result.success?: #{result.success?}"
+
+
+	if result.success?
+		#TODO: update DB: this customer has paid
+
+		redirect '/braintree_success'
+	end
+end
+
+get "/braintree_success" do
+	erb :braintree_success
 end
 
 get '/api/v1/test/msg/:number' do
