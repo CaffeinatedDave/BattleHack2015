@@ -94,3 +94,26 @@ get '/api/v1/test/call/:number' do
 		:from => $number)
 	call.sid
 end
+
+get '/api/v1/call/incoming' do
+	res = $db[:users].find({'phone' => params['From']})
+
+	Thread.new do 
+		res.each do |r|
+			r["contacts"].each do |c|
+				if c["active"] == 1
+					message = $client.account.messages.create(
+						:body => c["message"],
+						:to   => c["phone"],
+						:from => $number 
+					)
+					warn("Sent message " + message.sid + " to " + c["name"])
+				end
+			end
+		end
+	end
+
+	Twilio::TwiML::Response.new do |r|
+		r.Say 'Ice, Ice, Baby'
+	end.text
+end
