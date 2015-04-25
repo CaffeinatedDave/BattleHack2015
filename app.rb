@@ -122,6 +122,10 @@ post "/checkout_test" do
 			# Yes
 			# 
 
+		#TODO: Buy twilio number for customer, and store it...:
+		numbers = @client.account.available_phone_numbers.mobile.list(:country=>"EN")
+		numbers[0].purchase()
+
 		#redirect '/braintree_success'
 	end
 end
@@ -156,6 +160,7 @@ end
 get '/api/v1/call/incoming' do
 	res = $db[:users].find({'phone' => params['From']}).to_a
 	message = ""
+	dial = ""
 
 	if res.empty?
 		warn("Couldn't find any records for " + params['From'])
@@ -164,7 +169,7 @@ get '/api/v1/call/incoming' do
 		Thread.new do 
 			# We have to only have one... right?
 			res[0]["contacts"].each do |c|
-				if c["active"] == 1
+				if c["active"] == 1 && c["type"] == "SMS"
 					message = $client.account.messages.create(
 						:body => c["message"],
 						:to   => c["phone"],
@@ -175,11 +180,27 @@ get '/api/v1/call/incoming' do
 			end
 		end
 
-		message = 'Ice, Ice, Baby'
+		res[0]["contacts"].each do |c|
+			if dial == ""
+				if c["active"] == 1 && c["type"] == "Phone"
+					dial = c["phone"]
+					dialee = c["name"]
+					warn("Going to call " + c["name"])
+				end
+			end
+		end
+
+		if dial == ""
+			message = "Your call has been registered, and the person's contacts have been notified. Thank you"
+		else
+			message = "Your call has been registered, you will now be put through to this person's emergency contact. Please hold"
+		end
 	end
 
 	Twilio::TwiML::Response.new do |r|
 		r.Say "#{message}"
-		r.Dial "+447446967965"
+		if dial != ""
+			r.Dial dial
+		end
 	end.text
 end
