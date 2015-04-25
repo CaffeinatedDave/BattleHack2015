@@ -4,6 +4,8 @@ require 'dotenv'
 require 'mongo'
 require 'braintree'
 
+enable :sessions
+
 Dotenv.load
 
 include Mongo
@@ -32,18 +34,6 @@ end
 post "/checkout_test" do
 	nonce = params[:payment_method_nonce]
 
-	# Test the different example nonces (Braintree::Test::Nonce::<test_nonce>)
-	#	nonce                              result.success?
-	#
-	#	Transactable                       true
-	#	Consumed                           .
-	#	fake-apple-pay-amex-nonce          .
-	#	fake-apple-pay-visa-nonce          .
-	#	fake-apple-pay-mastercard-nonce    .
-	#	PayPalOneTimePayment               .
-	#	PayPalFuturePayment                .
-	#nonce = Braintree::Test::Nonce::Consumed
-
 	result = Braintree::Transaction.sale(
 		:amount => "10.00",
 		:payment_method_nonce => nonce,
@@ -53,19 +43,29 @@ post "/checkout_test" do
 		}
 	)
 
-	errors = ""
-	if ! result.success?
-		result.errors.each do |error|
-			puts error.code
-			puts error.message
-		end
-	end
-
 	# check whether this was sucessful
 	warn "nonce:           #{nonce}"
 	warn "result:          #{result}"
 	warn "result.inspect:  #{result.inspect}"
 	warn "result.success?: #{result.success?}"
+
+	# Assume no errors, until we've checked.
+	errors                   = ""
+	session["error_code"]    = ""
+	session["error_message"] = ""
+
+	if ! result.success?
+		# Yes, I know this could technically return multiple errors, but for now I'll just spit out the last error.
+		result.errors.each do |error|
+			warn "error.code:      #{error.code}"
+			warn "error.message:   #{error.message}"
+
+			session["error_code"]    = error.code
+			session["error_message"] = error.message
+		end
+
+		redirect '/braintree_error'
+	end
 
 
 	if result.success?
@@ -73,6 +73,13 @@ post "/checkout_test" do
 
 		redirect '/braintree_success'
 	end
+end
+
+get "/braintree_error" do
+	@error_code    = session["error_code"]
+	@error_message = session["error_message"]
+
+	erb :braintree_error
 end
 
 get "/braintree_success" do
