@@ -28,17 +28,74 @@ def updateMongoDoc( id, field )
 end
 
 get '/' do
-	if session["phone"].empty?
-		warn("no user found for phone #{params['From']}")
+	# if session["phone"].empty?
+	# 	warn("no user found for phone #{params['From']}")
 
-		redirect '/login'
-	else
+	# 	redirect '/login'
+	# else
 		redirect '/home'
-	end
+	# end
 end
 
 get '/login' do
-	erb :login
+	@mode = "login"
+	erb :userform
+end
+
+post '/login' do
+	warn("loginsubmit")
+	warn(params)
+	
+	if params['inputUserPhone'] == "" or params['inputUserPassword'] == ""
+		"Username/Password empty"
+	else 
+		# Login user
+		res = $db[:users].find({'phone' => params['inputUserPhone']}).to_a
+		if res.empty? 
+			status 503
+			"No user with that phone number found"
+		elsif res[0]["password"] != params['inputUserPassword']
+			status 503
+			"Password incorrect"
+		else
+			status 200
+			"LOGIN"
+		end
+	end
+	
+end
+
+get '/register' do
+	@mode = "register"
+	erb :userform
+end
+
+post '/register' do
+	warn("loginsubmit")
+	warn(params)
+	
+	if params['inputUserPhone'] == "" or params['inputUserPassword'] == "" or params['inputUserEmail'] == ""
+		"Username/Password/Email empty"
+	else 
+		# Login user
+		res = $db[:users].find({'phone' => params['inputUserPhone']}).to_a
+		if !res.empty? 
+			status 503
+			"A user with that phone number already exists"
+		else
+			$db[:users].insert_one(
+				{
+					:phone => params['inputUserPhone'],
+					:email => params['inputUserEmail'],
+					:password => params['inputUserPassword'],
+					:contacts =>[]
+				}
+			);
+			status 200
+			"REGISTERED SUCCESSFULLY #{params}"
+		end
+	end
+	
 end
 
 get '/home' do
@@ -271,3 +328,4 @@ get '/api/v1/call/incoming' do
 		end
 	end.text
 end
+

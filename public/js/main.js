@@ -7,4 +7,20 @@ $(document).ready(function(){
 		};
 	})
 	
+	$('#loginForm').submit(function(e){
+		alert("submit");
+		$.ajax({
+			type: "POST",
+			url: "/login",
+			data: this.serialize(),
+			success: function(msg) {
+				alert(msg);
+			},
+			error: function(msg) {
+				alert("ERROR"+msg);	
+			},
+			dataType: json
+		});
+		return false;
+	})
 });

@@ -8,6 +8,11 @@
 <div class="panel panel-primary">
 	<div class="panel-heading">Your Contacts</div>
 	<ul class="list-group contacts-list">
+		<% if @user["contacts"].empty? %>
+		<li class="list-group-item">
+			You have no contacts setup yet. Click the button below and <strong>get started!</strong>
+		</li>
+		<% end %>
 		<% @user["contacts"].each do |contact|  %>
 			<li class="list-group-item">
 				<p class="cl-row-header">
