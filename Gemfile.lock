@@ -1,6 +1,8 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    braintree (2.42.0)
+      builder (>= 2.0.0)
     bson (3.0.1)
     builder (3.2.2)
     dotenv (2.0.1)
@@ -26,6 +28,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  braintree
   dotenv
   json (= 1.8.1)
   mongo
