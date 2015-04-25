@@ -19,7 +19,7 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URI'] + "?connectTimeoutMS=10000")
+$db = Mongo::Client.new(ENV['MONGOLAB_URI'])
 
 Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
@@ -36,12 +36,6 @@ end
 
 # not a braintree page, unless we say otherwise
 @braintree = false
-
-get '/' do
-
-	redirect '/home'
-
-end
 
 get '/login' do
 	@mode = "login"
@@ -110,7 +104,8 @@ post '/register' do
 					:phone => params['inputUserPhone'],
 					:email => params['inputUserEmail'],
 					:password => params['inputUserPassword'],
-					:contacts =>[]
+					:contacts =>[],
+					:twilio_number => "N/A"
 				}
 			);
 			loginUser( params['inputUserPhone'] )
@@ -142,8 +137,7 @@ def logoutUser()
 	session["loggedInPhone"] = ""
 end
 
-get '/home' do
-	warn("Tried going /home")
+get '/' do
 	if !session['loggedInPhone'] || session["loggedInPhone"] == ""
 		redirect '/login'
 	else
@@ -285,15 +279,16 @@ post "/checkout_test" do
 	if result.success?
 		#TODO: update DB: this customer has paid
 
-		#TODO: Buy twilio number for customer, and store it...:
 		begin
 			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
-			phone_number = numbers[0].phone_number
-			$client.account.incoming_phone_numbers.create(:phone_number => phone_number)
-			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => phone_number})
+			@phone_number = numbers[0].phone_number
+			$client.account.incoming_phone_numbers.create(:phone_number => @phone_number)
+			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => @phone_number})
 		rescue
 			warn("Can't purchase a new number...")
-			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => "+13115552368"})
+			# Who they gonna call....?
+			@phone_number = "+13115552368"
+			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => @phone_number})
 		end
 
 		redirect '/braintree_success'
