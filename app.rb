@@ -12,7 +12,7 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URL'])
+$db = Mongo::Client.new(ENV['MONGOLAB_URI'])
 
 get '/' do
 	erb :index
