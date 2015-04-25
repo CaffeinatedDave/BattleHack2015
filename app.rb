@@ -31,13 +31,9 @@ end
 @braintree = false
 
 get '/' do
-	# if session["phone"].empty?
-	# 	warn("no user found for phone #{params['From']}")
 
-	# 	redirect '/login'
-	# else
-		redirect '/home'
-	# end
+	redirect '/home'
+
 end
 
 get '/login' do
@@ -50,17 +46,20 @@ post '/login' do
 	warn(params)
 	
 	if params['inputUserPhone'] == "" or params['inputUserPassword'] == ""
+		status 400
 		"Username/Password empty"
 	else 
 		# Login user
 		res = $db[:users].find({'phone' => params['inputUserPhone']}).to_a
 		if res.empty? 
-			status 503
+			status 400
 			"No user with that phone number found"
 		elsif res[0]["password"] != params['inputUserPassword']
-			status 503
+			status 400
 			"Password incorrect"
 		else
+			loginUser( params['inputUserPhone'] )
+			
 			status 200
 			"LOGIN"
 		end
@@ -78,12 +77,13 @@ post '/register' do
 	warn(params)
 	
 	if params['inputUserPhone'] == "" or params['inputUserPassword'] == "" or params['inputUserEmail'] == ""
+		status 400
 		"Username/Password/Email empty"
 	else 
 		# Login user
 		res = $db[:users].find({'phone' => params['inputUserPhone']}).to_a
 		if !res.empty? 
-			status 503
+			status 400
 			"A user with that phone number already exists"
 		else
 			$db[:users].insert_one(
@@ -94,6 +94,8 @@ post '/register' do
 					:contacts =>[]
 				}
 			);
+			loginUser( params['inputUserPhone'] )
+
 			status 200
 			"REGISTERED SUCCESSFULLY #{params}"
 		end
@@ -101,18 +103,39 @@ post '/register' do
 	
 end
 
+get '/logout' do
+	warn("logout")
+	warn(params)
+	
+	logoutUser()
+	redirect '/login'
+end
+
+def loginUser( phone )
+	session["loggedInPhone"] = phone
+	warn(session["loggedInPhone"])
+end
+
+def logoutUser()
+	session["loggedInPhone"] = ""
+end
+
 get '/home' do
 	warn("Tried going /home")
-	res = $db[:users].find({'phone' => params['From']}).to_a
-	# If no user with that phone number in the DB, go to error page
-	if res.empty?
-		warn("no user found for phone #{params['From']}")
-		
-		#redirect '/login'
+	if session["loggedInPhone"] == ""
+		redirect '/login'
 	else
-		@user = res[0]
+		res = $db[:users].find({'phone' => session["loggedInPhone"]}).to_a
+		# If no user with that phone number in the DB, go to error page
+		if res.empty?
+			warn("no user found for phone #{params['From']}")
+			
+			#redirect '/login'
+		else
+			@user = res[0]
+		end
+		erb :home
 	end
-	erb :home
 end
 
 get '/braintree_init' do

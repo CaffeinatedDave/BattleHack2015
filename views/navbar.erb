@@ -4,5 +4,12 @@
     <div class="navbar-header">
       <a class="navbar-brand" href="#">EaaS: Emergency as a Service</a>
     </div>
+    <ul class="nav navbar-nav navbar-right">
+    <% if session['loggedInPhone'] == "" %>
+        <li><a href="/login">Login</a></li>
+    <% else %>
+        <li><a href="/logout">Logout</a></li>
+    <% end %>
+    </ul>
   </div><!--/.container-fluid -->
 </nav>

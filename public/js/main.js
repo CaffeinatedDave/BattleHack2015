@@ -7,20 +7,38 @@ $(document).ready(function(){
 		};
 	})
 	
-	$('#loginForm').submit(function(e){
-		alert("submit");
+	$('#loginForm').on( "submit", function( event ) {
+		$('.alert').remove();
+		event.preventDefault();
+		var data_ser = $(this).serialize();
 		$.ajax({
 			type: "POST",
 			url: "/login",
-			data: this.serialize(),
-			success: function(msg) {
-				alert(msg);
-			},
-			error: function(msg) {
-				alert("ERROR"+msg);	
-			},
-			dataType: json
+			data: data_ser
+		}).done( function(msg) {
+			$("#loginForm").prepend('<div class="alert alert-success" role="alert">Success, redirecting to home</div>');	
+			window.setTimeout(function(){window.location.replace("/home")} ,1000);
+			
+		}).fail(function(jqXHR, msg) {
+			$("#loginForm").prepend('<div class="alert alert-danger" role="alert">Problem with login: '+jqXHR.responseText+'</div>');	
 		});
-		return false;
-	})
+	});
+		
+	$('#registerForm').on( "submit", function( event ) {
+		$('.alert').remove();
+		event.preventDefault();
+		var data_ser = $(this).serialize();
+		$.ajax({
+			type: "POST",
+			url: "/register",
+			data: data_ser
+		}).done( function(msg) {
+			$("#registerForm").prepend('<div class="alert alert-success" role="alert">Success, redirecting to home</div>');	
+			window.setTimeout(function(){window.location.replace("/home")} ,1000);
+			
+		}).fail(function(jqXHR, msg) {
+			$("#registerForm").prepend('<div class="alert alert-danger" role="alert">Problem with registration: '+jqXHR.responseText+'</div>');	
+		});
+
+	});
 });
