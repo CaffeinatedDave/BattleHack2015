@@ -28,7 +28,31 @@ def updateMongoDoc( id, field )
 end
 
 get '/' do
-	erb :index
+	if session["phone"].empty?
+		warn("no user found for phone #{params['From']}")
+
+		redirect '/login'
+	else
+		redirect '/home'
+	end
+end
+
+get '/login' do
+	erb :login
+end
+
+get '/home' do
+	warn("Tried going /home")
+	res = $db[:users].find({'phone' => params['From']}).to_a
+	# If no user with that phone number in the DB, go to error page
+	if res.empty?
+		warn("no user found for phone #{params['From']}")
+		
+		#redirect '/login'
+	else
+		@user = res[0]
+	end
+	erb :home
 end
 
 get '/braintree_init' do
@@ -158,8 +182,13 @@ post "/checkout_test" do
 			# 
 
 		#TODO: Buy twilio number for customer, and store it...:
-		numbers = $client.account.available_phone_numbers.list(:country=>"EN")
-		#numbers[0].purchase()
+		begin
+			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
+			phone_number = numbers[0].phone_number
+			$client.account.incoming_phone_numbers.create(:phone_number => phone_number)
+		rescue
+			warn("Can't purchase a new number...")
+		end
 
 		#@ice_number = numbers[0]
 		@ice_number = 123

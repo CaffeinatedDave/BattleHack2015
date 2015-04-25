@@ -1,33 +1,39 @@
-<html>
-<head>
-	<!-- Move this somewhere else in future. We don't need this on every page. -->
-	<script src="https://js.braintreegateway.com/v2/braintree.js"></script>
-	<script
-	  src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.14/require.min.js"
-	></script>
-	<script>
-	require.config({
-		paths: {
-			braintree: "https://assets.braintreegateway.com/v2/braintree"
-		}
-	});
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+		<title>ICE CUBED</title>
 
-	require(["braintree"], function (braintree) {
-		braintree.setup(
-			"<%= @client_token %>",
-			'dropin', {
-				container: 'dropin'
-			}
-		);
-	});
-	</script>
-</head>
+		<script type="text/javascript">
+		require(["braintree"], function (braintree) {
+			braintree.setup(
+				"<%= @client_token %>",
+				'dropin', {
+					container: 'dropin'
+				}
+			);
+		});
+		</script>
+		
+		<!-- Bootstrap -->
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<link href="css/main.css" rel="stylesheet">
+	</head>
 
-<body>
+	<body>
 
-<%= yield %>
+		<div class="container">
+			<%= erb :navbar %>
+			<%= yield %>
+		</div> <!-- /container -->
 
-</body>
-
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/main.js"></script>
+	</body>
 </html>
-

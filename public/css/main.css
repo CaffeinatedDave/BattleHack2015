@@ -1,0 +1,17 @@
+
+.contacts-list .expander-form{
+	display: none;
+	border-top: 1px solid #ddd;
+	padding-top: 10px;
+	margin-top: 10px;
+}
+
+.cl-row-header strong {
+	width: 30%;
+	display: block;
+	float: left;
+}
+
+.cl-row-header button {
+	float:right;
+}
