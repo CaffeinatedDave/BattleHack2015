@@ -2,6 +2,7 @@ require 'sinatra'
 require 'twilio-ruby'
 require 'dotenv'
 require 'mongo'
+require 'braintree'
 
 Dotenv.load
 
@@ -13,6 +14,11 @@ $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
 $db = Mongo::Client.new(ENV['MONGOLAB_URI'])
+
+Braintree::Configuration.environment = :sandbox
+Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
+Braintree::Configuration.public_key = ENV['BRAINTREE_PUBLIC_KEY']
+Braintree::Configuration.private_key = ENV['BRAINREE_PRIVATE_KEY']
 
 get '/' do
 	erb :index
