@@ -186,8 +186,10 @@ post "/checkout_test" do
 			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
 			phone_number = numbers[0].phone_number
 			$client.account.incoming_phone_numbers.create(:phone_number => phone_number)
+			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => phone_number})
 		rescue
 			warn("Can't purchase a new number...")
+			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => "+13115552368"})
 		end
 
 		#@ice_number = numbers[0]
