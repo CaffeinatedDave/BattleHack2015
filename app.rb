@@ -56,11 +56,11 @@ get '/api/v1/test/call/:number' do
 end
 
 get '/api/v1/incoming' do
-	Twilio::TwiML::Response.new do |r|
-		r.Say 'Ice Ice Baby'
-	end.text
-
 	res = $db[:users].find({'phone' => params['From']})
 
 	warn(res.to_s)
+
+	Twilio::TwiML::Response.new do |r|
+		r.Say 'Ice Ice Baby'
+	end.text
 end
