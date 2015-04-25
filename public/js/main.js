@@ -33,8 +33,8 @@ $(document).ready(function(){
 			url: "/register",
 			data: data_ser
 		}).done( function(msg) {
-			$("#registerForm").prepend('<div class="alert alert-success" role="alert">Success, redirecting to home</div>');	
-			window.setTimeout(function(){window.location.replace("/home")} ,1000);
+			$("#registerForm").prepend('<div class="alert alert-success" role="alert">Success, redirecting to payment page</div>');	
+			window.setTimeout(function(){window.location.replace("/braintree_test")} ,1000);
 			
 		}).fail(function(jqXHR, msg) {
 			$("#registerForm").prepend('<div class="alert alert-danger" role="alert">Problem with registration: '+jqXHR.responseText+'</div>');	

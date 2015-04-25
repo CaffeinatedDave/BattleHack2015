@@ -95,6 +95,7 @@ post '/register' do
 				}
 			);
 			loginUser( params['inputUserPhone'] )
+			session['user_phone'] = params['inputUserPhone']
 
 			status 200
 			"REGISTERED SUCCESSFULLY #{params}"
@@ -132,6 +133,8 @@ get '/home' do
 			
 			#redirect '/login'
 		else
+			# TODO: if user has not paid, redirect to payment page
+
 			@user = res[0]
 		end
 		erb :home
@@ -143,7 +146,7 @@ get '/braintree_init' do
 end
 
 get '/braintree_test' do
-	@user_phone = params['user_phone']
+	@user_phone = session['user_phone']
 	@braintree = true
 
 	# Find the user in the DB. Assume user phone number is unique
@@ -202,7 +205,7 @@ get '/braintree_test' do
 end
 
 post "/checkout_test" do
-	user_phone = params['user_phone']
+	user_phone = session['user_phone']
 	warn("user phone: #{user_phone}")
 
 	# Find the user in the DB. Assume user phone number is unique
@@ -271,9 +274,6 @@ post "/checkout_test" do
 			warn("Can't purchase a new number...")
 			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => "+13115552368"})
 		end
-
-		#@ice_number = numbers[0]
-		@ice_number = 123
 
 		redirect '/braintree_success'
 	end
