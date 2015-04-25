@@ -270,7 +270,7 @@ end
 get '/api/v1/test/msg' do
 	message = $client.account.messages.create(
 		:body => "Success!",
-		:to   => params["From"],
+		:to   => params["number"],
 		:from => $number)
 	message.sid
 end
@@ -278,18 +278,18 @@ end
 get '/api/v1/test/call' do
 	call = $client.account.calls.create(
 		:url => 'http://twimlets.com/holdmusic?Bucket=com.twilio.music.ambient',
-		:to   => params["From"],
+		:to   => params["number"],
 		:from => $number)
 	call.sid
 end
 
 get '/api/v1/call/incoming' do
-	res = $db[:users].find({'phone' => params['From']}).to_a
+	res = $db[:users].find({'twilio_number' => params['To']}).to_a
 	message = ""
 	dial = ""
 
 	if res.empty?
-		warn("Couldn't find any records for " + params['From'])
+		warn("Couldn't find any records for " + params['To'])
 		message = "This number has not been recognised, and no help is coming. Sorry."
 	else
 		Thread.new do 
