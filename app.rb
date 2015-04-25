@@ -60,7 +60,7 @@ get '/api/v1/incoming' do
 		r.Say 'Ice Ice Baby'
 	end.text
 
-	res = $db[:users].find({phone => params['From']})
+	res = $db[:users].find({'phone' => params['From']})
 
 	res.to_s
 end
