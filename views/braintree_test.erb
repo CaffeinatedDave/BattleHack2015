@@ -1,8 +1,37 @@
 <form id="checkout" method="post" action="/checkout_test">
-	<p>Payment Option</p>
-	<p><input type="radio" name="payment_plan" value="1" id="pplan-1"><label for="pplan-1">$15 for 1 year</label></p>
-	<p><input type="radio" name="payment_plan" value="2" id="pplan-2" checked="checked"><label for="pplan-2">$26 for 2 years</label></p>
-	<p><input type="radio" name="payment_plan" value="3" id="pplan-3"><label for="pplan-3">$100 for lifetime membership</label></p>
-	<div id="dropin"></div>
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Payment Option</h3>
+		</div>
+		<div class="panel-body">
+			<label>
+				<input type="radio" name="payment_plan" value="1" checked>
+				$15 for 1 year
+			</label>
+			<label>
+				<input type="radio" name="payment_plan" value="2" checked>
+				$26 for 3 years
+			</label>
+			<label>
+				<input type="radio" name="payment_plan" value="3" checked>
+				$100 for lifetime membership
+			</label>
+		</div>
+	</div>
+
+	<div class="panel panel-default">
+		<div class="panel-heading">
+			<h3 class="panel-title">Payment Details</h3>
+		</div>
+		<div class="panel-body">
+			<div id="dropin"></div>
+		</div>
+	</div>
+
 	<p><input type="submit" value="Pay"></p>
+	<button type="button" class="btn btn-default btn-lg btn-block">Block level button</button>
 </form>
+
+
+
+
