@@ -334,7 +334,11 @@ post "/checkout_test" do
 		begin
 			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
 			@phone_number = numbers[0].phone_number
-			$client.account.incoming_phone_numbers.create(:phone_number => @phone_number)
+			$client.account.incoming_phone_numbers.create(
+				:phone_number => @phone_number,
+				:voice_url => "http://obbattlehack.herokuapp.com/api/v1/call/incoming",
+				:voice_method => "GET"
+			)
 			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => @phone_number})
 		rescue
 			warn("Can't purchase a new number...")
@@ -422,3 +426,7 @@ get '/api/v1/call/incoming' do
 	end.text
 end
 
+
+get '/about' do
+
+end
