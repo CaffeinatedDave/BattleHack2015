@@ -151,6 +151,8 @@ get '/' do
 		else
 			# TODO: if user has not paid, redirect to payment page
 
+			# TODO: if the user's membership has expired, redirect to payment page
+
 			@user = res[0]
 		end
 		erb :home
@@ -246,12 +248,8 @@ get '/braintree_test' do
 			a_customer_id = result.customer.id
 			warn "Sucessfully added a customer. ID: #{a_customer_id}"
 
-			# Update db document with _id : res[0]['_id']
-			#$db[:users].find(:_id => res[0]['_id']).find_one_and_update( "$set" => { :test_col_3 => "bar" } )
-
 			updateMongoDoc( {:_id => res[0]['_id']}, { :braintree_customer_id => result.customer.id } )
 
-			#db.users.update( {_id: ObjectId("553bcdcdf4356848e62008d8")}, {$set: { test_col : "foo" }} )
 		else
 			result.errors.each do |error|
 				warn "error.code:      #{error.code}"
@@ -294,8 +292,13 @@ post "/checkout_test" do
 
 	nonce = params[:payment_method_nonce]
 
+	# $10 per year
+	# TODO: add a selector: 1 year, 2 years, 5 years, lifetime (100 years)
+	years  = 1
+	amount = years * 10.00
+
 	result = Braintree::Transaction.sale(
-		:amount => "10.00",
+		:amount => amount,
 		:payment_method_nonce => nonce,
 		:options => {
 			:submit_for_settlement     => true,
@@ -329,7 +332,9 @@ post "/checkout_test" do
 
 
 	if result.success?
-		#TODO: update DB: this customer has paid
+		warn "Expire membership in #{years} years"
+		membership_expiry = Time.now + (60 * 60 * 24 * 365 * years)
+		updateMongoDoc( {:_id => res[0]['_id']}, { :customer_membership_expiry => membership_expiry } )
 
 		begin
 			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
