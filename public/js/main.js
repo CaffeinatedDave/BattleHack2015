@@ -1,9 +1,9 @@
 $(document).ready(function(){
 	
 	$('#loginForm').on( "submit", function( event ) {
-		$('.alert').remove();
+		var clone = prep_user_form($(this));
 		event.preventDefault();
-		var data_ser = $(this).serialize();
+		var data_ser = $(clone).serialize();
 		$.ajax({
 			type: "POST",
 			url: "/login",
@@ -18,9 +18,9 @@ $(document).ready(function(){
 	});
 		
 	$('#registerForm').on( "submit", function( event ) {
-		$('.alert').remove();
+		var clone = prep_user_form($(this));
 		event.preventDefault();
-		var data_ser = $(this).serialize();
+		var data_ser = $(clone).serialize();
 		$.ajax({
 			type: "POST",
 			url: "/register",
@@ -56,11 +56,20 @@ $(document).ready(function(){
 	$('#contactsForm').on('click',function(e){
 		var target = $(e.target);
 		if (target.hasClass('cl-edit-button')) {
-			target.closest('.cl-row-header').siblings('.expander-form').slideDown();
+			target.closest('.cl-row-header').siblings('.expander-form').slideToggle();
 		} else if (target.hasClass('cl-delete-button')) {
 			target
 				.closest('.list-group-item').addClass('removed')
 				.find('.expander-form').remove();
+		}
+	});
+	
+	$('#contactsForm .g-inputType input').on('change',function(e){
+		var target = $(e.target);
+		if (target.val() == "phone") {
+			target.closest('.list-group-item').addClass('cl-phone-contact');
+		} else {
+			target.closest('.list-group-item').removeClass('cl-phone-contact');
 		}
 	});
 	
@@ -107,3 +116,11 @@ $(document).ready(function(){
 	});
 	
 });
+
+function prep_user_form(form) {
+	$('.alert').remove();
+	var fullPhoneNum = $('#inputUserPhoneExt').text() + $('#inputUserPhone').val();
+	var clone = form.clone();
+	clone.find('#inputUserPhone').val(fullPhoneNum);
+	return clone;
+}

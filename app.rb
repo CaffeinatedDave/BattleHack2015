@@ -48,7 +48,7 @@ post '/login' do
 	
 	if params['inputUserPhone'] == "" or params['inputUserPassword'] == ""
 		status 400
-		"Username/Password empty"
+		"Phone number/Password empty"
 	else 
 		# Login user
 		res = $db[:users].find({'phone' => params['inputUserPhone']}).to_a
@@ -90,7 +90,7 @@ post '/register' do
 	warn("loginsubmit")
 	warn(params)
 	
-	if params['inputUserPhone'] == "" or params['inputUserPassword'] == "" or params['inputUserEmail'] == ""
+	if params['inputUserName'] == "" or params['inputUserPhone'] == "" or params['inputUserPassword'] == "" or params['inputUserEmail'] == ""
 		status 400
 		"Username/Password/Email empty"
 	else 
@@ -103,8 +103,9 @@ post '/register' do
 			$db[:users].insert_one(
 				{
 					:phone => params['inputUserPhone'],
-					:email => params['inputUserEmail'],
 					:password => params['inputUserPassword'],
+					:full_name => params['inputUserName'],
+					:email => params['inputUserEmail'],
 					:contacts =>[],
 					:twilio_number => "N/A"
 				}
@@ -174,7 +175,7 @@ post '/' do
 			if params["inputContactName"+i_str] != "" and
 				!params["inputContactType"+i_str].empty? and
 				params["inputContactPhone"+i_str] != "" and
-				params["inputContactMessage"+i_str] != ""
+				(params["inputContactMessage"+i_str] != "")
 			
 				contact = {
 					:name => params["inputContactName"+i_str], 

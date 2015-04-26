@@ -6,6 +6,10 @@
 	margin-top: 10px;
 }
 
+.cl-confirm-button {
+	float:right;
+}
+
 .list-group-item.removed {
 	color:#444;
 	background:#eee;
@@ -22,3 +26,13 @@
 	margin-left: 10px;
 }
 
+#about img {
+	padding-top: 10px;
+	width: 30%;
+	margin-right: 1.5%;
+	margin-left: 1%;
+}
+
+.cl-phone-contact .g-inputMessage {
+	display: none;
+}
