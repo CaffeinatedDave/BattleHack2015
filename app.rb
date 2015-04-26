@@ -255,10 +255,14 @@ get '/braintree_test' do
 		warn "Customer has no braintree_customer_id"
 
 		# They shouldn't have if they're new, so create one, with an email address and phone number, and get their customer_id
-		# TODO: We now store customer names. Put those in here too
 		result = Braintree::Customer.create(
 			:email => res[0]['email'],
-			:phone => res[0]['phone']
+			:phone => res[0]['phone'],
+
+			# First name is the first word...
+			:first_name => res[0]['full_name'].split(' ', 2)[0],
+			# Last name is everything else, or ""
+			:last_name  => res[0]['full_name'].split(' ', 2)[1] || ""
 		)
 		if result.success?
 			a_customer_id = result.customer.id
