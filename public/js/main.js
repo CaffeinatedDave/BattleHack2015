@@ -17,7 +17,7 @@ $(document).ready(function(){
 			data: data_ser
 		}).done( function(msg) {
 			$("#loginForm").prepend('<div class="alert alert-success" role="alert">Success, redirecting to home</div>');	
-			window.setTimeout(function(){window.location.replace("/home")} ,1000);
+			window.setTimeout(function(){window.location.replace("/")} ,1000);
 			
 		}).fail(function(jqXHR, msg) {
 			$("#loginForm").prepend('<div class="alert alert-danger" role="alert">Problem with login: '+jqXHR.responseText+'</div>');	
