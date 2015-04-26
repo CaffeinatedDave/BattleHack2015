@@ -50,3 +50,9 @@
 #inputUserPhoneExt img {
 	margin-right: 3px;
 }
+
+
+.how-does-it-work .glyphicon {
+	float: left;
+	margin: 0px 2px 4px 0px;
+}

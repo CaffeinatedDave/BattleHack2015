@@ -49,7 +49,10 @@
 						<div class="form-group g-inputPhone">
 							<label for="inputPhone" class="col-sm-2 control-label">Phone Number</label>
 							<div class="col-sm-10">
-								<input type="phone" class="form-control" id="inputPhone" name="inputContactPhone<%= index %>" value="<%= contact["phone"] %>">
+								<div class="input-group">
+									<div class="input-group-addon phone-extension"><img src="/flag_great_britain.png" />+44</div>
+									<input type="phone" class="form-control" id="inputPhone" name="inputContactPhone<%= index %>" value="<%= contact["phone"].sub /^\+44/, '' %>">
+								</div>
 							</div>
 						</div>
 						
@@ -71,7 +74,7 @@
 		<button type="button" id="cl-add-new" class="btn btn-success btn cl-add-button">
 			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add new contact
 		</button>
-		<button type="submit" class="btn btn-success btn cl-confirm-button">
+		<button type="submit" class="btn btn-default btn cl-confirm-button">
 			<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Confirm Changes
 		</button>
 	</div>

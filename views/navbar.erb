@@ -5,9 +5,12 @@
       <a class="navbar-brand" href="/">EaaS<span class=".hidden-sm">: Emergency as a Service</span></a>
     </div>
     <ul class="nav navbar-nav navbar-right">
+    	
     <% if session['loggedInPhone'] == "" %>
+        <li><a href="/welcome">Welcome</a></li>
         <li><a href="/login">Login</a></li>
     <% else %>
+    	<li><a href="/welcome">About EaaS</a></li>
         <li><a href="/logout">Logout</a></li>
     <% end %>
     </ul>

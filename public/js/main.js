@@ -38,7 +38,12 @@ $(document).ready(function(){
 	$('#contactsForm').on( "submit", function( event ) {
 		$('.alert').remove();
 		event.preventDefault();
-		var data_ser = $(this).serialize();
+		var clone = $(this).clone();
+		clone.find('.g-inputPhone input').each(function() {
+			var fullPhoneNum = $(this).siblings('.phone-extension').text()+$(this).val();
+			$(this).val(fullPhoneNum);
+		});;
+		var data_ser = clone.serialize();
 		$.ajax({
 			type: "POST",
 			url: "/",
@@ -57,10 +62,12 @@ $(document).ready(function(){
 		var target = $(e.target);
 		if (target.hasClass('cl-edit-button')) {
 			target.closest('.cl-row-header').siblings('.expander-form').slideToggle();
+			$('.cl-confirm-button').removeClass('btn-default').addClass('btn-success');
 		} else if (target.hasClass('cl-delete-button')) {
 			target
 				.closest('.list-group-item').addClass('removed')
 				.find('.expander-form').remove();
+			$('.cl-confirm-button').removeClass('btn-default').addClass('btn-success');
 		}
 	});
 	
@@ -80,13 +87,13 @@ $(document).ready(function(){
 		var new_i = parseInt(form.find('#inputNumIncrem').val());
 		form.find('#inputNumIncrem').val(parseInt(new_i)+1);
 		var default_form_html = '<li class="list-group-item">'
-			+'<div class="form-group">'
+			+'<div class="form-group g-inputName">'
 				+'<label class="col-sm-2 control-label">Name</label>'
 				+'<div class="col-sm-10">'
 					+'<input class="form-control" id="inputContactName" name="inputContactName'+new_i+'" value=""/>'
 				+'</div>'
 			+'</div>'
-			+'<div class="form-group">'
+			+'<div class="form-group g-inputType">'
 				+'<label class="col-sm-2 control-label">Contact Type</label>'
 				+'<div class="col-sm-10">'
 +'					'
@@ -98,13 +105,16 @@ $(document).ready(function(){
 					+'</label>'
 				+'</div>'
 			+'</div>'
-			+'<div class="form-group">'
+			+'<div class="form-group g-inputPhone">'
 				+'<label for="inputPhone" class="col-sm-2 control-label">Phone Number</label>'
 				+'<div class="col-sm-10">'
-					+'<input type="phone" class="form-control" id="inputPhone" name="inputContactPhone'+new_i+'" value="">'
+					+'<div class="input-group">'
+						+'<div class="input-group-addon phone-extension"><img src="/flag_great_britain.png" />+44</div>'
+						+'<input type="phone" class="form-control" id="inputPhone" name="inputContactPhone'+new_i+'" value="">'
+					+'</div>'
 				+'</div>'
 			+'</div>'
-			+'<div class="form-group">'
+			+'<div class="form-group g-inputMessage">'
 				+'<label for="inputMessage" class="col-sm-2 control-label">Message</label>'
 				+'<div class="col-sm-10">'
 					+'<textarea id="inputContactMessage" class="form-control" name="inputContactMessage'+new_i+'"  rows="2" >Hi Mum, Someone has called my Emergency phone number</textarea>'
@@ -113,6 +123,7 @@ $(document).ready(function(){
 			+'<i>Use the "Confirm Changes" button below to submit</i>'
 		+'</li>';
 		form.find('.contacts-list').append(default_form_html);
+		$('.cl-confirm-button').removeClass('btn-default').addClass('btn-success');
 	});
 	
 });

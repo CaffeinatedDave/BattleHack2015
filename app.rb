@@ -37,6 +37,12 @@ end
 # not a braintree page, unless we say otherwise
 @braintree = false
 
+get '/welcome' do
+	
+	erb :welcome
+end
+
+
 get '/login' do
 	@mode = "login"
 	erb :userform
