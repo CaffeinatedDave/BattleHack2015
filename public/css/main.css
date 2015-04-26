@@ -36,3 +36,12 @@
 .cl-phone-contact .g-inputMessage {
 	display: none;
 }
+
+
+
+#pplans label {
+	display: block;
+}
+#pplans label input {
+	margin-right: 6px;
+}
