@@ -189,8 +189,7 @@ post '/' do
 		if params.include?("inputContactName"+i_str) 
 			if params["inputContactName"+i_str] != "" and
 				!params["inputContactType"+i_str].empty? and
-				params["inputContactPhone"+i_str] != "" and
-				(params["inputContactMessage"+i_str] != "")
+				params["inputContactPhone"+i_str] != ""
 			
 				contact = {
 					:name => params["inputContactName"+i_str], 
