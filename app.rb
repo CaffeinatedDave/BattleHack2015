@@ -388,7 +388,7 @@ get '/api/v1/call/incoming' do
 			res[0]["contacts"].each do |c|
 				if c["active"] == 1 && c["type"] == "SMS"
 					message = $client.account.messages.create(
-						:body => c["message"],
+						:body => c["message"] + ". From " + params['From'],
 						:to   => c["phone"],
 						:from => $number 
 					)
