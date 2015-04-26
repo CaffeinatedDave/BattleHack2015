@@ -426,7 +426,7 @@ get '/api/v1/call/incoming' do
 
 		res[0]["contacts"].each do |c|
 			if dial == ""
-				if c["active"] == 1 && c["type"] == "Phone"
+				if c["active"] == 1 && c["type"] == "phone"
 					dial = c["phone"]
 					dialee = c["name"]
 					warn("Going to call " + c["name"])
