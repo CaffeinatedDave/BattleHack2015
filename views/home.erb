@@ -1,12 +1,16 @@
 <!-- Main component for a primary marketing message or call to action -->
 <div class="panel panel-default">
 	<div class="panel-body">
-		<span class="lead">Your ICE number is: <%= @user["twilio_number"] %></span>
+		<% if @user["twilio_number"] == "N/A" %>
+		<span class="lead">No ICE number setup yet</span>
+		<% else %>
+		<span class="lead">Your ICE number is: <a href="tel:<%= @user["twilio_number"] %>"><%= @user["twilio_number"] %></a></span>
+		<% end %>
 	</div>
 </div>
 
 <div class="panel panel-primary">
-	<div class="panel-heading">Your Contacts (<%= @user["contacts"].length %>)</div>
+	<div class="panel-heading">Your Contacts &nbsp; <span class="badge"><%= @user["contacts"].length %></span></div>
 	<form id="contactsForm" action="/" method="post" class="form-horizontal">
 	<ul class="list-group contacts-list">
 		<% if @user["contacts"].empty? %>
@@ -15,22 +19,22 @@
 		</li>
 		<% end %>
 		<% @user["contacts"].each_with_index do |contact,index| %>
-			<li class="list-group-item">
+			<li class="list-group-item <% if contact["type"] == "phone" %>cl-phone-contact<% end %>">
 				<p class="cl-row-header">
 					<strong><%= contact["name"] %></strong>
 					<%= contact["phone"] %>
 					<button type="button" class="btn btn-warning btn-sm cl-delete-button">Delete</button>
 					<button type="button" class="btn btn-primary btn-sm cl-edit-button">Edit</button>
 				</p>
-				<div class="expander-form">
+				<div class="expander-form collapsed">
 					
-						<div class="form-group">
+						<div class="form-group g-inputName">
 							<label class="col-sm-2 control-label">Name</label>
 							<div class="col-sm-10">
 								<input class="form-control" id="inputContactName" name="inputContactName<%= index %>" value="<%= contact["name"] %>"/>
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group g-inputType">
 							<label class="col-sm-2 control-label">Contact Type</label>
 							<div class="col-sm-10">
 								
@@ -42,18 +46,20 @@
 								</label>
 							</div>
 						</div>
-						<div class="form-group">
+						<div class="form-group g-inputPhone">
 							<label for="inputPhone" class="col-sm-2 control-label">Phone Number</label>
 							<div class="col-sm-10">
 								<input type="phone" class="form-control" id="inputPhone" name="inputContactPhone<%= index %>" value="<%= contact["phone"] %>">
 							</div>
 						</div>
-						<div class="form-group">
+						
+						<div class="form-group g-inputMessage">
 							<label for="inputMessage" class="col-sm-2 control-label">Message</label>
 							<div class="col-sm-10">
 								<textarea id="inputContactMessage" class="form-control" name="inputContactMessage<%= index %>"  rows="2" ><%= contact["message"] %></textarea>
 							</div>
 						</div>
+						
 						<i>Use the "Confirm Changes" button below to submit</i>
 					
 				</div>
@@ -62,8 +68,12 @@
 	</ul>
 	<div class="panel-footer">
 		<input type="hidden" id="inputNumIncrem" name="inputNumIncrem" value="<%= @user["contacts"].length %>"/>
-		<button type="button" id="cl-add-new" class="btn btn-success btn cl-add-button">Add new contact</button>
-		<button type="submit" class="btn btn-success btn cl-add-button">Confirm Changes</button>
+		<button type="button" id="cl-add-new" class="btn btn-success btn cl-add-button">
+			<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add new contact
+		</button>
+		<button type="submit" class="btn btn-success btn cl-confirm-button">
+			<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Confirm Changes
+		</button>
 	</div>
 	</form>
 </div>
