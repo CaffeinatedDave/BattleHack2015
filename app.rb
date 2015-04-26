@@ -19,7 +19,7 @@ auth_token  = ENV['TWILIO_AUTH_TOKEN']
 $number     = ENV['TWILIO_NUMBER']
 $client     = Twilio::REST::Client.new account_sid, auth_token
 
-$db = Mongo::Client.new(ENV['MONGOLAB_URI'])
+$db = Mongo::Client.new(ENV['MONGOD_AWS_URI'])
 
 Braintree::Configuration.environment = :sandbox
 Braintree::Configuration.merchant_id = ENV['BRAINTREE_MERCHANT_ID']
@@ -52,6 +52,7 @@ post '/login' do
 	else 
 		# Login user
 		res = $db[:users].find({'phone' => params['inputUserPhone']}).to_a
+		
 		if res.empty? 
 			status 400
 			"No user with that phone number found"
