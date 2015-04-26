@@ -6,26 +6,28 @@
 </div>
 
 <div class="panel panel-primary">
-	<div class="panel-heading">Your Contacts</div>
+	<div class="panel-heading">Your Contacts (<%= @user["contacts"].length %>)</div>
+	<form id="contactsForm" action="/" method="post" class="form-horizontal">
 	<ul class="list-group contacts-list">
 		<% if @user["contacts"].empty? %>
-		<li class="list-group-item">
+		<li class="list-group-item cl-no-contacts">
 			You have no contacts setup yet. Click the button below and <strong>get started!</strong>
 		</li>
 		<% end %>
-		<% @user["contacts"].each do |contact|  %>
+		<% @user["contacts"].each_with_index do |contact,index| %>
 			<li class="list-group-item">
 				<p class="cl-row-header">
 					<strong><%= contact["name"] %></strong>
 					<%= contact["phone"] %>
+					<button type="button" class="btn btn-warning btn-sm cl-delete-button">Delete</button>
 					<button type="button" class="btn btn-primary btn-sm cl-edit-button">Edit</button>
 				</p>
 				<div class="expander-form">
-					<form class="form-horizontal">
+					
 						<div class="form-group">
 							<label class="col-sm-2 control-label">Name</label>
 							<div class="col-sm-10">
-								<input class="form-control" id="inputContactName" placeholder="<%= contact["name"] %>"/>
+								<input class="form-control" id="inputContactName" name="inputContactName<%= index %>" value="<%= contact["name"] %>"/>
 							</div>
 						</div>
 						<div class="form-group">
@@ -33,32 +35,37 @@
 							<div class="col-sm-10">
 								
 								<label class="radio-inline">
-								  <input type="radio" name="inputContactType" id="inlineRadio1" value="phone"> phone
+								  <input type="radio" name="inputContactType<%= index %>[]" id="inlineRadio1" value="phone" <% if contact["type"] == "phone" %>checked <% end %>> phone
 								</label>
 								<label class="radio-inline">
-								  <input type="radio" name="inputContactType" id="inlineRadio2" value="text"> text
+								  <input type="radio" name="inputContactType<%= index %>[]" id="inlineRadio2" value="SMS" <% if contact["type"] == "SMS" %>checked <% end %>> SMS
 								</label>
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="inputPhone" class="col-sm-2 control-label">Phone Number</label>
 							<div class="col-sm-10">
-								<input type="phone" class="form-control" id="inputPhone" placeholder="<%= contact["phone"] %>">
+								<input type="phone" class="form-control" id="inputPhone" name="inputContactPhone<%= index %>" value="<%= contact["phone"] %>">
 							</div>
 						</div>
 						<div class="form-group">
 							<label for="inputMessage" class="col-sm-2 control-label">Message</label>
 							<div class="col-sm-10">
-								<textarea id="inputMessage" class="form-control" rows="3"></textarea>
+								<textarea id="inputContactMessage" class="form-control" name="inputContactMessage<%= index %>"  rows="2" ><%= contact["message"] %></textarea>
 							</div>
 						</div>
-						<button type="submit" class="btn btn-default">Confirm Edit</button>
-					</form>
+						<i>Use the "Confirm Changes" button below to submit</i>
+					
 				</div>
 			</li>
 		<% end %>
 	</ul>
-
+	<div class="panel-footer">
+		<input type="hidden" id="inputNumIncrem" name="inputNumIncrem" value="<%= @user["contacts"].length %>"/>
+		<button type="button" id="cl-add-new" class="btn btn-success btn cl-add-button">Add new contact</button>
+		<button type="submit" class="btn btn-success btn cl-add-button">Confirm Changes</button>
+	</div>
+	</form>
 </div>
 
 	

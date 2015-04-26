@@ -145,9 +145,9 @@ get '/' do
 		res = $db[:users].find({'phone' => session["loggedInPhone"]}).to_a
 		# If no user with that phone number in the DB, go to error page
 		if res.empty?
-			warn("no user found for phone #{params['From']}")
+			warn("no user found for phone #{session["loggedInPhone"]}")
 			
-			#redirect '/login'
+			redirect '/login'
 		else
 			# TODO: if user has not paid, redirect to payment page
 
@@ -156,6 +156,57 @@ get '/' do
 		erb :home
 	end
 end
+
+
+post '/' do
+	warn("Doing contacts")
+	warn(params)
+	#validate contacts
+	max = params["inputNumIncrem"].to_i
+	i = 0
+	contacts = []
+	while i < max do
+		warn("doing #{i}")
+		i_str = i.to_s
+		if params.include?("inputContactName"+i_str) 
+			if params["inputContactName"+i_str] != "" and
+				!params["inputContactType"+i_str].empty? and
+				params["inputContactPhone"+i_str] != "" and
+				params["inputContactMessage"+i_str] != ""
+			
+				contact = {
+					:name => params["inputContactName"+i_str], 
+					:type => params["inputContactType"+i_str][0], 
+					:phone => params["inputContactPhone"+i_str], 
+					:message => params["inputContactMessage"+i_str], 
+					:active => 1
+				}
+				
+				contacts << contact
+				
+			else
+				status 400
+				"One of the contacts had a missing field"
+			end
+		else
+			warn(i_str +"wasnt found")
+		end
+		# increment
+		i+=1
+	end
+	
+	warn(contacts)
+	#delete old contacts
+	#add new contacts
+	result = $db[:users]
+		.find(:phone => session["loggedInPhone"])
+		.find_one_and_update('$set' => { :contacts => contacts })
+
+	status 200
+	"Updated contacts correctly"
+end
+
+
 
 get '/braintree_init' do
 	erb :braintree_init

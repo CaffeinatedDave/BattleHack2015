@@ -6,6 +6,11 @@
 	margin-top: 10px;
 }
 
+.list-group-item.removed {
+	color:#444;
+	background:#eee;
+}
+
 .cl-row-header strong {
 	width: 30%;
 	display: block;
@@ -14,4 +19,6 @@
 
 .cl-row-header button {
 	float:right;
+	margin-left: 10px;
 }
+
