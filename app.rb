@@ -422,7 +422,7 @@ get '/api/v1/call/incoming' do
 		else
 			Twilio::TwiML::Response.new do |r|
 				r.Gather :numDigits => '1', :action => '/api/v1/call/incoming', :method => 'get' do |g|
-					g.Say "You have dialed the Emergency as a Service for #{res[0]["full_name"]}. To report a lost phone, dial 1, for an emergency, please press 2"
+					g.Say "You have dialed Emergency as a Service for #{res[0]["full_name"]}. To report a lost phone, dial 1, for an emergency, please press 2"
 				end
 			end.text
 		end
