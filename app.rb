@@ -86,6 +86,15 @@ def emailNewUser( emailAddr )
 	$sendgrid.send(email)
 end
 
+def emailExpiringUser( emailAddr )
+	email = SendGrid::Mail.new do |m|
+		m.to      = emailAddr
+		m.from    = 'EaaS@example.com'
+		m.subject = 'Your EaaS membership will expire soon'
+		m.html    = '<h1>EaaS: Emergency as a Service</h1><p>Here at EaaS, your safety is our number one priorty (so much so that we have rushed this app out without sending it to the spell-checkers!).</p><p>Your membership is set to expire soon, make sure you keep your account topped up to stay protected.</p>'
+	end
+end
+
 post '/register' do
 	warn("loginsubmit")
 	warn(params)
@@ -345,7 +354,8 @@ post "/checkout_test" do
 		updateMongoDoc( {:_id => res[0]['_id']}, { :customer_membership_expiry => membership_expiry } )
 
 		begin
-			numbers = $client.account.available_phone_numbers.get("GB").local.list(:contains => "+4420")
+			numbers = $client.account.available_phone_numbers.
+				get("GB").local.list(:voice_enabled => true, :sms_enabled => true)
 			@phone_number = numbers[0].phone_number
 			$client.account.incoming_phone_numbers.create(
 				:phone_number => @phone_number,
@@ -439,7 +449,24 @@ get '/api/v1/call/incoming' do
 	end.text
 end
 
+get '/api/v1/cron/reminder' do
+	date = param[:date] || Time.now.to_s.split(' ')[0]
+	(y, m, d) = date.split('-')
+
+	res = $db[:users].find({
+		:customer_membership_expiry => {
+			"$gte" => Time.utc(y, m, d),
+			"$lt" => Time.utc(y, m, d) + 86400
+		}
+	})
+
+	res.each do |r|
+		emailExpiringUser(r["email"])
+	end
+end
 
 get '/about' do
 	erb :about
 end
+
+
