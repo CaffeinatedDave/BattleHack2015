@@ -408,6 +408,60 @@ end
 
 get '/api/v1/call/incoming' do
 	res = $db[:users].find({'twilio_number' => params['To']}).to_a
+	if res.empty?
+		warn("Couldn't find any records for " + params['To'])
+		Twilio::TwiML::Response.new do |r|
+			r.say "This number has not been recognised, and no help is coming. Sorry."
+		end.text
+	else
+		Twilio::TwiML::Response.new do |r|
+			r.Gather :numDigits => '1', :action => '/api/v1/call/incoming/choice', :method => 'get' do |g|
+				g.say "You have dialed the Emergency as a Service for #{res[0]["name"]}. To report a lost phone, dial 1, for an emergency, please press 2"
+			end
+		end.text
+	end
+end
+
+get '/api/v1/call/incoming/choice' do
+	case params['Digits']
+	when 1
+		redirect '/api/v1/call/lost' + request.fullpath
+	when 2
+		redirect '/api/v1/call/emergency' + request.fullpath
+	else
+		redirect '/api/v1/call/incoming' + request.fullpath
+	end
+end
+
+get '/api/v1/call/incoming/emergency' do
+	res = $db[:users].find({'twilio_number' => params['To']}).to_a
+
+	if res.empty?
+		warn("Couldn't find any records for " + params['To'])
+		message = "This number has not been recognised, and no help is coming. Sorry."
+	else
+		Thread.new do 
+			# We have to only have one... right?
+			res[0]["contacts"].each do |c|
+				if c["active"] == 1 && c["type"] == "SMS"
+					message = $client.account.messages.create(
+						:body => "Whoops, " + res[0]["full_name"] + " seems to have lost their phone. Please call " + params['From'] + " to arrange it's safe return",
+						:to   => c["phone"],
+						:from => $number 
+					)
+					warn("Sent lost phone message " + message.sid + " to " + c["name"])
+				end
+			end
+		end
+	end
+
+	Twilio::TwiML::Response.new do |r|
+		
+	end
+end
+
+get '/api/v1/call/incoming/emergency' do
+	res = $db[:users].find({'twilio_number' => params['To']}).to_a
 	message = ""
 	dial = ""
 
