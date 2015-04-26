@@ -417,12 +417,12 @@ get '/api/v1/call/incoming' do
 		if res.empty?
 			warn("Couldn't find any records for " + params['To'])
 			Twilio::TwiML::Response.new do |r|
-				r.say "This number has not been recognised, and no help is coming. Sorry."
+				r.Say "This number has not been recognised, and no help is coming. Sorry."
 			end.text
 		else
 			Twilio::TwiML::Response.new do |r|
 				r.Gather :numDigits => '1', :action => '/api/v1/call/incoming', :method => 'get' do |g|
-					g.say "You have dialed the Emergency as a Service for #{res[0]["full_name"]}. To report a lost phone, dial 1, for an emergency, please press 2"
+					g.Say "You have dialed the Emergency as a Service for #{res[0]["full_name"]}. To report a lost phone, dial 1, for an emergency, please press 2"
 				end
 			end.text
 		end
@@ -452,7 +452,7 @@ get '/api/v1/call/incoming/lost' do
 	end
 
 	Twilio::TwiML::Response.new do |r|
-		r.say "Thank you, someone will be in touch soon to hopefully reclaim their phone"
+		r.Say "Thank you, someone will be in touch soon to hopefully reclaim their phone"
 	end.text
 end
 
