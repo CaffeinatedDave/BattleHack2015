@@ -450,7 +450,7 @@ get '/api/v1/call/incoming' do
 end
 
 get '/api/v1/cron/reminder' do
-	date = param[:date] || Time.now.to_s.split(' ')[0]
+	date = params[:date] || Time.now.to_s.split(' ')[0]
 	(y, m, d) = date.split('-')
 
 	res = $db[:users].find({
