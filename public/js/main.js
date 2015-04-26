@@ -71,7 +71,7 @@ $(document).ready(function(){
 		}
 	});
 	
-	$('#contactsForm .g-inputType input').on('change',function(e){
+	$( document ).on( "change", '#contactsForm .g-inputType input', function(e) {
 		var target = $(e.target);
 		if (target.val() == "phone") {
 			target.closest('.list-group-item').addClass('cl-phone-contact');
