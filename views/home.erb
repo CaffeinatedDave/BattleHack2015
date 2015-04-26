@@ -4,7 +4,8 @@
 		<% if @user["twilio_number"] == "N/A" %>
 		<span class="lead">No ICE number setup yet</span>
 		<% else %>
-		<span class="lead">Your ICE number is: <a href="tel:<%= @user["twilio_number"] %>"><%= @user["twilio_number"] %></a></span>
+		<span class="lead">Your ICE number is: <a href="tel:<%= @user["twilio_number"] %>"><%= @user["twilio_number"] %></a></span><br/>
+		<p style="font-style: italics">This number expires on: <%= @user["customer_membership_expiry"].to_s.split(' ')[0] %></p>
 		<% end %>
 	</div>
 </div>

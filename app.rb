@@ -445,7 +445,7 @@ get '/api/v1/call/incoming/lost' do
 			res[0]["contacts"].each do |c|
 				if c["active"] == 1 && c["type"] == "SMS"
 					message = $client.account.messages.create(
-						:body => "Whoops, " + res[0]["full_name"] + " seems to have lost their phone. Please call " + params['From'] + " to arrange it's safe return",
+						:body => "Whoops, " + res[0]["full_name"] + " seems to have lost their phone. Please call " + params['From'] + " to arrange its safe return",
 						:to   => c["phone"],
 						:from => $number 
 					)
