@@ -156,7 +156,7 @@ end
 
 get '/' do
 	if !session['loggedInPhone'] || session["loggedInPhone"] == ""
-		redirect '/login'
+		redirect '/welcome'
 	else
 		res = $db[:users].find({'phone' => session["loggedInPhone"]}).to_a
 		# If no user with that phone number in the DB, go to error page
