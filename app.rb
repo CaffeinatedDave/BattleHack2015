@@ -359,7 +359,7 @@ post "/checkout_test" do
 			@phone_number = numbers[0].phone_number
 			$client.account.incoming_phone_numbers.create(
 				:phone_number => @phone_number,
-				:voice_url => "http://obbattlehack.herokuapp.com/api/v1/call/incoming",
+				:voice_url => ENV['PHONE_CALLBACK'],
 				:voice_method => "GET"
 			)
 			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => @phone_number})
