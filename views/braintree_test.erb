@@ -1,4 +1,8 @@
 <form id="checkout" method="post" action="/checkout_test">
+	<p>Payment Option</p>
+	<p><input type="radio" name="payment_plan" value="1" id="pplan-1"><label for="pplan-1">$15 for 1 year</label></p>
+	<p><input type="radio" name="payment_plan" value="2" id="pplan-2" checked="checked"><label for="pplan-2">$26 for 2 years</label></p>
+	<p><input type="radio" name="payment_plan" value="3" id="pplan-3"><label for="pplan-3">$100 for lifetime membership</label></p>
 	<div id="dropin"></div>
-	<input type="submit" value="Pay $10">
+	<p><input type="submit" value="Pay"></p>
 </form>

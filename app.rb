@@ -287,16 +287,22 @@ post "/checkout_test" do
 	warn "res: #{res.inspect}"
 
 
-
-
+	payment_plan = params[:payment_plan]
+	warn "Selected plan #{payment_plan}"
+	case payment_plan
+		when "1"
+			years = 1
+			amount = 15.0
+		when "2"
+			years = 2
+			amount = 26.0
+		when "3"
+			years = 100
+			amount = 100
+	end
+	warn "$#{amount} for #{years} years"
 
 	nonce = params[:payment_method_nonce]
-
-	# $10 per year
-	# TODO: add a selector: 1 year, 2 years, 5 years, lifetime (100 years)
-	years  = 1
-	amount = years * 10.00
-
 	result = Braintree::Transaction.sale(
 		:amount => amount,
 		:payment_method_nonce => nonce,
