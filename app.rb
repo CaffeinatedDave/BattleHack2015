@@ -407,33 +407,29 @@ get '/api/v1/test/call' do
 end
 
 get '/api/v1/call/incoming' do
-	res = $db[:users].find({'twilio_number' => params['To']}).to_a
-	if res.empty?
-		warn("Couldn't find any records for " + params['To'])
-		Twilio::TwiML::Response.new do |r|
-			r.say "This number has not been recognised, and no help is coming. Sorry."
-		end.text
+	case params[:Digits]
+	when "1"
+		redirect '/api/v1/call/incoming/lost?' + request.query_string
+	when "2"
+		redirect '/api/v1/call/incoming/emergency?' + request.query_string
 	else
-		Twilio::TwiML::Response.new do |r|
-			r.Gather :numDigits => '1', :action => '/api/v1/call/incoming/choice', :method => 'get' do |g|
-				g.say "You have dialed the Emergency as a Service for #{res[0]["name"]}. To report a lost phone, dial 1, for an emergency, please press 2"
-			end
-		end.text
+		res = $db[:users].find({'twilio_number' => params['To']}).to_a
+		if res.empty?
+			warn("Couldn't find any records for " + params['To'])
+			Twilio::TwiML::Response.new do |r|
+				r.say "This number has not been recognised, and no help is coming. Sorry."
+			end.text
+		else
+			Twilio::TwiML::Response.new do |r|
+				r.Gather :numDigits => '1', :action => '/api/v1/call/incoming', :method => 'get' do |g|
+					g.say "You have dialed the Emergency as a Service for #{res[0]["full_name"]}. To report a lost phone, dial 1, for an emergency, please press 2"
+				end
+			end.text
+		end
 	end
 end
 
-get '/api/v1/call/incoming/choice' do
-	case params['Digits']
-	when 1
-		redirect '/api/v1/call/lost' + request.fullpath
-	when 2
-		redirect '/api/v1/call/emergency' + request.fullpath
-	else
-		redirect '/api/v1/call/incoming' + request.fullpath
-	end
-end
-
-get '/api/v1/call/incoming/emergency' do
+get '/api/v1/call/incoming/lost' do
 	res = $db[:users].find({'twilio_number' => params['To']}).to_a
 
 	if res.empty?
@@ -456,8 +452,8 @@ get '/api/v1/call/incoming/emergency' do
 	end
 
 	Twilio::TwiML::Response.new do |r|
-		
-	end
+		r.say "Thank you, someone will be in touch soon to hopefully reclaim their phone"
+	end.text
 end
 
 get '/api/v1/call/incoming/emergency' do
