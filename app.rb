@@ -343,7 +343,7 @@ post "/checkout_test" do
 		updateMongoDoc( {:_id => res[0]['_id']}, { :customer_membership_expiry => membership_expiry } )
 
 		begin
-			numbers = $client.account.available_phone_numbers.get("GB").mobile.list(:contains => "+447")
+			numbers = $client.account.available_phone_numbers.get("GB").local.list(:contains => "+4420")
 			@phone_number = numbers[0].phone_number
 			$client.account.incoming_phone_numbers.create(
 				:phone_number => @phone_number,
@@ -439,5 +439,5 @@ end
 
 
 get '/about' do
-
+	erb :about
 end
