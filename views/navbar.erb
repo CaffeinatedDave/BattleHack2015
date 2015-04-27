@@ -6,7 +6,7 @@
     </div>
     <ul class="nav navbar-nav navbar-right">
     	
-    <% if session['loggedInPhone'] == "" %>
+    <% if session['loggedInPhone'] == nil %>
         <li><a href="/welcome">Welcome</a></li>
         <li><a href="/login">Login</a></li>
     <% else %>

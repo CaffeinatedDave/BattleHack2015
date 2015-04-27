@@ -151,11 +151,11 @@ def loginUser( phone )
 end
 
 def logoutUser()
-	session["loggedInPhone"] = ""
+	session.clear
 end
 
 get '/' do
-	if !session['loggedInPhone'] || session["loggedInPhone"] == ""
+	if session['loggedInPhone'] == nil
 		redirect '/welcome'
 	else
 		res = $db[:users].find({'phone' => session["loggedInPhone"]}).to_a
@@ -375,7 +375,7 @@ post "/checkout_test" do
 		rescue
 			warn("Can't purchase a new number...")
 			# Who they gonna call....?
-			@phone_number = "+13115552368"
+			@phone_number = "+12125552368"
 			updateMongoDoc({:_id => res[0]['_id']}, {"twilio_number" => @phone_number})
 		end
 
